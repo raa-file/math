@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>شفرة الرياضيات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F9; --panel:#FFFFFF; --ink:#1B2540; --ink2:#2A3556; --muted:#5B6683; --line:#DCE1EC;
+  --brass:#C9962B; --brass-d:#7A5A10; --brass-soft:#F6EBCF;
+  --ok:#13806F; --ok-soft:#DDF3EE; --bad:#C93F5C; --bad-soft:#FBE3E8;
+  --kufi:'Reem Kufi','IBM Plex Sans Arabic',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Arabic',system-ui,'Segoe UI',Tahoma,sans-serif;font-size:17px;line-height:1.75}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 56px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 2px 12px}
+.brand{font-family:var(--kufi);font-weight:700;font-size:26px;line-height:1.2}
+.brand small{display:block;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:400;font-size:13px;color:var(--muted)}
+.pts{font-size:14px;color:var(--muted);text-align:left}
+.pts b{display:block;font-family:var(--kufi);font-size:24px;color:var(--ink);line-height:1.1}
+
+.vault{position:sticky;top:8px;z-index:5;background:var(--ink);border-radius:18px;padding:12px 14px 10px;color:#fff}
+.vault-title{font-size:13px;color:#AEB8D4;margin-bottom:8px;text-align:center}
+.slots{display:flex;justify-content:center;gap:14px;direction:ltr}
+.grp{display:flex;flex-direction:column;align-items:center;gap:4px}
+.pair{display:flex;gap:5px}
+.slot{--sw:clamp(34px,11vw,46px);width:var(--sw);height:calc(var(--sw)*1.28);border-radius:9px;border:1.5px solid #46537C;background:#232F52;display:grid;place-items:center;font-family:var(--kufi);font-size:clamp(24px,7vw,32px);color:var(--brass);perspective:300px}
+.slot svg{opacity:.4;color:var(--brass)}
+.slot.on{border-color:var(--brass);background:var(--ink2)}
+.slot.pop{animation:flip .6s ease-out}
+.gl{font-size:12px;color:#8FA0C8;direction:rtl}
+@keyframes flip{0%{transform:rotateX(90deg);opacity:0}100%{transform:none;opacity:1}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:14px}
+.center{text-align:center}
+h1,h2{font-family:var(--kufi);margin:0 0 8px;line-height:1.35}
+h1{font-size:30px}
+h2{font-size:23px}
+.lead{color:var(--muted);margin:0 0 18px}
+.fl{font-size:14px;color:var(--muted);margin:14px 0 6px}
+.txt{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+.txt:focus{border-color:var(--brass);outline:none}
+.lv{display:grid;gap:8px;margin-bottom:20px}
+.lvb{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:right;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
+.lvb small{color:var(--muted);font-size:13px}
+.lvb[aria-checked=true]{border-color:var(--brass);background:var(--brass-soft)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:10px;border:1.5px solid var(--ink);background:#fff;cursor:pointer;font-weight:500}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:var(--ink2)}
+.btn.ghost{border-color:var(--line);color:var(--muted)}
+.btn:disabled{opacity:.5;cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.full{width:100%}
+
+.maphead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chip{font-size:13px;background:var(--brass-soft);color:var(--brass-d);padding:2px 12px;border-radius:99px}
+.map{list-style:none;margin:10px 0 0;padding:0}
+.map li{position:relative;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:12px 0}
+.map li::before{content:'';position:absolute;right:21px;top:0;bottom:0;width:2px;background:var(--line)}
+.map li:first-child::before{top:50%}
+.map li:last-child::before{bottom:50%}
+.node{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:#EEF0F6;color:var(--muted)}
+.node.done{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.node.cur{background:var(--brass-soft);border-color:var(--brass);color:var(--brass-d)}
+.rt{font-weight:700}
+.rd{font-size:14px;color:var(--muted);line-height:1.5}
+.lockedtxt{font-size:13px;color:var(--muted)}
+.map li.lock .rt{color:var(--muted)}
+
+.qmeta{font-size:13px;color:var(--muted)}
+.qt{margin-top:2px}
+.prompt{margin:8px 0 12px}
+.m{unicode-bidi:isolate;direction:ltr;display:inline-block;white-space:nowrap;font-family:var(--kufi);font-weight:500}
+.eq{font-family:var(--kufi);font-weight:500;font-size:clamp(26px,7vw,34px);text-align:center;padding:16px 8px;background:#F7F8FC;border:1px dashed #C4CBDC;border-radius:12px;margin:12px 0;unicode-bidi:isolate;white-space:nowrap;overflow-x:auto}
+.fig{margin:10px 0}
+.svg{width:100%;max-width:360px;display:block;margin:0 auto}
+.svg text{font-family:var(--kufi);font-size:15px;font-weight:500;fill:#1B2540}
+.note{text-align:center;font-size:12px;color:var(--muted)}
+.ansrow{display:flex;align-items:center;gap:12px;margin:14px 0 4px}
+.ansrow label{font-size:22px}
+.ans{width:92px;height:56px;font-family:var(--kufi);font-size:30px;text-align:center;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.ans:focus{border-color:var(--brass);outline:none}
+.ans[readonly]{background:var(--ok-soft);border-color:var(--ok)}
+.hint{margin:10px 0 0;padding:10px 14px;background:var(--brass-soft);border-radius:10px;font-size:15.5px}
+.fb{margin-top:12px;border-radius:10px;font-size:16px}
+.fb.ok{background:var(--ok-soft);color:#0B5A4D;padding:10px 14px}
+.fb.bad{background:var(--bad-soft);color:#8E2540;padding:10px 14px}
+.fb.warn{background:#EEF0F6;color:var(--muted);padding:10px 14px}
+
+.steps{list-style:none;margin:8px 0 0;padding:0}
+.step{display:flex;align-items:center;gap:12px;width:100%;text-align:right;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;margin-bottom:8px;font-size:20px}
+.step:disabled{cursor:default}
+.step .sn{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:13px;color:var(--muted);min-width:68px}
+.step .tag{margin-inline-start:auto;font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bad);color:#fff;border-radius:99px;padding:0 10px}
+.step.fine{background:var(--ok-soft);border-color:#9AD5C9}
+.step.found{background:var(--bad-soft);border-color:var(--bad)}
+.fixbox{margin-top:10px;padding:12px 14px;border-inline-start:4px solid var(--ok);background:#F2FAF8;border-radius:6px;font-size:16px}
+
+.pin{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;direction:ltr}
+.pinbox{width:clamp(40px,12vw,52px);height:clamp(52px,15vw,64px);text-align:center;font-family:var(--kufi);font-size:30px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.pinbox:focus{border-color:var(--brass);outline:none}
+.pinbox.good{background:var(--ok-soft);border-color:var(--ok)}
+.pinbox.badbox{background:var(--bad-soft);border-color:var(--bad)}
+.boxsvg{width:100%;max-width:280px;display:block;margin:4px auto}
+.lid,.gem{transition:transform .9s cubic-bezier(.3,1.35,.5,1),opacity .6s .15s}
+.lid{transform-origin:160px 90px}
+.gem{opacity:0;transform:translateY(42px)}
+.open .lid{transform:translateY(-58px) rotate(-9deg)}
+.open .gem{opacity:1;transform:translateY(-6px)}
+
+.big{font-family:var(--kufi);font-size:46px;line-height:1.2}
+.big small{font-size:20px;color:var(--muted)}
+.stats{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;color:var(--muted);font-size:15px;margin:6px 0 14px}
+.trow{display:grid;grid-template-columns:1.7fr 1fr .8fr 1fr .9fr;gap:6px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
+.trow.h{border-top:0;color:var(--muted);font-size:13px;padding-top:0}
+.trow span:not(:first-child){text-align:center}
+.dash{color:var(--muted)}
+
+.cert{margin-top:14px;background:#fff;border:2px solid var(--brass);border-radius:8px;padding:10px}
+.cert-in{border:1px solid var(--brass);padding:30px 18px;text-align:center}
+.cert h3{font-family:var(--kufi);font-size:34px;margin:6px 0 2px}
+.cert p{margin:6px 0}
+.cert .nm{display:inline-block;min-width:220px;font-family:var(--kufi);font-size:30px;border-bottom:1.5px solid var(--brass);padding:0 14px;margin:6px 0}
+.cert .sm{font-size:14px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body{background:#fff}
+  .top,.vault,.noprint{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .cert{margin:0;border-width:3px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">شفرة الرياضيات<small>فكّري، حلّي، اكتشفي!</small></div>
+    <div class="pts">النقاط<b id="pts">0</b></div>
+  </header>
+  <section class="vault" aria-label="الشفرة السرية">
+    <div class="vault-title">الشفرة السرية</div>
+    <div class="slots" id="slots"></div>
+  </section>
+  <main id="app"></main>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick = a => a[rnd(0, a.length - 1)];
+const shuffle = a => { const r = [...a]; for (let i = r.length - 1; i > 0; i--) { const j = rnd(0, i); [r[i], r[j]] = [r[j], r[i]]; } return r; };
+const co = c => c === 1 ? '' : c;
+const fmt = t => String(t).replace(/س/g, 'س\u200E');
+const M = t => `<span class="m" dir="ltr">${fmt(t)}</span>`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AR = '٠١٢٣٤٥٦٧٨٩';
+const norm = s => String(s).replace(/[٠-٩]/g, d => AR.indexOf(d)).replace(/\D/g, '');
+
+const app = $('#app');
+
+const STAGES = [
+  { title: 'قفل المعادلة',     desc: 'حلّي معادلة لتكشفي الرقم الأول',          slots: [0] },
+  { title: 'تحدي المعادلات',   desc: 'معادلتان، وكل إجابة تكشف رقمًا',           slots: [1, 2] },
+  { title: 'اكتشاف الخطأ',     desc: 'اعثري على الخطوة الخاطئة وصحّحيها',        slots: [3] },
+  { title: 'لغز الأشكال',      desc: 'مسألتان هندسيتان تفتحان قفلين',            slots: [4, 5] },
+  { title: 'الشفرة النهائية',  desc: 'اجمعي الأرقام وافتحي الصندوق',             slots: [] }
+];
+const LEVELS = {
+  easy: { name: 'سهل',   note: 'معادلات من خطوتين' },
+  mid:  { name: 'متوسط', note: 'متغيّر في الطرفين' },
+  hard: { name: 'متقدم', note: 'أقواس وخاصية التوزيع' }
+};
+const MEDALS = { gold: ['#C9962B', 'ذهبية'], silver: ['#98A3B8', 'فضية'], bronze: ['#B4693A', 'برونزية'] };
+const MAXPTS = 70;
+
+const LOCK = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+const UNLOCK = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.6"/></svg>';
+const LOCK22 = LOCK.replace(/width="18" height="18"/, 'width="22" height="22"');
+
+function medalSVG(k, s = 40) {
+  if (!k) return '<span class="dash">—</span>';
+  const c = MEDALS[k][0];
+  return `<svg viewBox="0 0 40 48" width="${s}" height="${Math.round(s * 1.2)}" role="img" aria-label="ميدالية ${MEDALS[k][1]}"><path d="M10 0h8l4 16h-8z" fill="${c}" opacity=".55"/><path d="M30 0h-8l-4 16h8z" fill="${c}" opacity=".85"/><circle cx="20" cy="30" r="14" fill="${c}"/><circle cx="20" cy="30" r="9.5" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2"/></svg>`;
+}
+
+/* ---------- المعادلات ---------- */
+function genE() {
+  const x = rnd(2, 9), a = rnd(2, 6), minus = Math.random() < .5;
+  let b, c;
+  if (minus) { b = rnd(1, Math.min(9, a * x - 1)); c = a * x - b; } else { b = rnd(1, 9); c = a * x + b; }
+  const sg = minus ? '−' : '+';
+  return {
+    eq: `${a}س ${sg} ${b} = ${c}`, ans: x,
+    hints: [
+      'اعزلي الحد الذي فيه س: انقلي العدد إلى الطرف الآخر مع تغيير إشارته.',
+      `${M(`${a}س = ${c} ${minus ? '+' : '−'} ${b} = ${minus ? c + b : c - b}`)} ثم اقسمي الطرفين على ${a}.`
+    ]
+  };
+}
+function genM() {
+  const a = rnd(3, 9), c = rnd(1, a - 1), k = a - c, x = rnd(2, 9), minus = Math.random() < .5;
+  let b, d;
+  if (minus) { b = rnd(1, Math.min(9, k * x - 1)); d = k * x - b; } else { b = rnd(1, 9); d = k * x + b; }
+  const rhs = minus ? d + b : d - b;
+  return {
+    eq: `${co(a)}س ${minus ? '−' : '+'} ${b} = ${co(c)}س + ${d}`, ans: x,
+    hints: [
+      'اجمعي الحدود التي فيها س في طرف، والأعداد في الطرف الآخر، وانتبهي لتغيّر الإشارة عند النقل.',
+      `${M(`${co(a)}س − ${co(c)}س = ${rhs}`)} أي ${M(`${k === 1 ? '' : k}س = ${rhs}`)}.`
+    ]
+  };
+}
+function genH() {
+  const a = rnd(3, 6), c = rnd(1, a - 1), k = a - c, x = rnd(2, 9), b = rnd(1, 4);
+  let minus = Math.random() < .5, d;
+  if (minus) { d = k * x - a * b; if (d < 1) minus = false; }
+  if (!minus) d = k * x + a * b;
+  const sg = minus ? '−' : '+';
+  const rhs = minus ? d + a * b : d - a * b;
+  return {
+    eq: `${a}(س ${sg} ${b}) = ${co(c)}س + ${d}`, ans: x,
+    hints: [
+      `وزّعي ${a} على كل حد داخل القوس أولًا.`,
+      `${M(`${a}س ${sg} ${a * b} = ${co(c)}س + ${d}`)} ثم انقلي الحدود: ${M(`${k === 1 ? '' : k}س = ${rhs}`)}.`
+    ]
+  };
+}
+const GEN = { e: genE, m: genM, h: genH };
+
+/* ---------- الأشكال ---------- */
+const svgT = (x, y, t, ex = '') => `<text x="${x}" y="${y}" text-anchor="middle" ${ex}>${fmt(t)}</text>`;
+const figTri = (l1, l2, l3) => `<svg viewBox="0 0 320 170" class="svg" role="img" aria-label="مثلث مكتوب عليه قياسات زواياه"><polygon points="30,150 290,150 190,20" fill="#F6EBCF" stroke="#1B2540" stroke-width="2.5" stroke-linejoin="round"/>${svgT(78, 138, l1)}${svgT(250, 138, l2)}${svgT(180, 70, l3, 'font-size="14"')}</svg>`;
+const figLine = (l1, l2) => `<svg viewBox="0 0 320 170" class="svg" role="img" aria-label="زاويتان على مستقيم واحد"><line x1="20" y1="130" x2="300" y2="130" stroke="#1B2540" stroke-width="2.5" stroke-linecap="round"/><line x1="170" y1="130" x2="150" y2="25" stroke="#1B2540" stroke-width="2.5" stroke-linecap="round"/><circle cx="170" cy="130" r="4.5" fill="#C9962B"/>${svgT(120, 92, l1, 'font-size="13"')}${svgT(212, 84, l2, 'font-size="13"')}</svg>`;
+const figRect = (top, right, mid) => `<svg viewBox="0 0 320 170" class="svg" role="img" aria-label="مستطيل مكتوب عليه أبعاده"><rect x="60" y="50" width="200" height="80" rx="2" fill="#F6EBCF" stroke="#1B2540" stroke-width="2.5"/>${svgT(160, 38, top)}${svgT(284, 96, right)}<text x="160" y="97" text-anchor="middle" style="font-size:16px">${fmt(mid)}</text></svg>`;
+
+const GEO = {
+  tri(L) {
+    for (;;) {
+      const k = L === 'easy' ? 10 : pick([10, 20]), t = L === 'hard' ? rnd(5, 15) : 0;
+      const x = rnd(2, 9), c = k * x + t, a = rnd(30, 70), b = 180 - a - c;
+      if (b < 20 || b > 100) continue;
+      const lab = `${k}س${t ? ' + ' + t : ''}`;
+      return {
+        prompt: 'في المثلث المقابل، مجموع قياسات الزوايا 180°. جدي قيمة س.',
+        fig: figTri(a + '°', b + '°', `(${lab})°`), ans: x,
+        hints: ['مجموع قياسات زوايا المثلث يساوي 180°.', `اكتبي ${M(`${a} + ${b} + ${lab} = 180`)}، فتحصلين على ${M(`${lab} = ${180 - a - b}`)}.`]
+      };
+    }
+  },
+  line(L) {
+    for (;;) {
+      const k = L === 'easy' ? pick([10, 20]) : pick([10, 15, 20]), t = L === 'hard' ? rnd(5, 20) : 0;
+      const x = rnd(2, 9), a1 = k * x + t, m = 180 - a1;
+      if (m < 20) continue;
+      const lab = `${k}س${t ? ' + ' + t : ''}`;
+      return {
+        prompt: 'الزاويتان في الرسم تقعان على مستقيم واحد. جدي قيمة س.',
+        fig: figLine(`(${lab})°`, m + '°'), ans: x,
+        hints: ['الزاويتان على مستقيم واحد مجموعهما 180°.', `${M(`${lab} + ${m} = 180`)} ومنها ${M(`${lab} = ${a1}`)}.`]
+      };
+    }
+  },
+  perim(L) {
+    const m = L === 'hard' ? pick([2, 3]) : L === 'mid' ? pick([1, 2]) : 1;
+    const a = rnd(1, 6), b = rnd(2, 8), x = rnd(2, 9), P = 2 * (m * x + a + b);
+    const lab = `${co(m)}س + ${a}`;
+    return {
+      prompt: `مستطيل محيطه ${P} (الأطوال بالسنتيمتر). جدي قيمة س.`,
+      fig: figRect(lab, String(b), `المحيط = ${P}`), ans: x,
+      hints: ['محيط المستطيل = 2 × (الطول + العرض).', `نصف المحيط ${P / 2}، إذن ${M(`${lab} + ${b} = ${P / 2}`)}.`]
+    };
+  },
+  area(L) {
+    const m = L === 'hard' ? pick([2, 3]) : L === 'mid' ? pick([1, 2]) : 1;
+    const a = rnd(1, 5), b = rnd(2, 6), x = rnd(2, 9), A = (m * x + a) * b;
+    const lab = `${co(m)}س + ${a}`;
+    return {
+      prompt: `مستطيل مساحته ${A} (الأطوال بالسنتيمتر). جدي قيمة س.`,
+      fig: figRect(lab, String(b), `المساحة = ${A}`), ans: x,
+      hints: ['مساحة المستطيل = الطول × العرض.', `اقسمي المساحة على العرض ${b}: ${M(`${lab} = ${A / b}`)}.`]
+    };
+  }
+};
+
+/* ---------- اكتشاف الخطأ ---------- */
+const ERR = {
+  easy: [
+    { s: ['3س + 4 = 19', '3س = 19 + 4', '3س = 23', 'س = 23 ÷ 3'], w: 1, fix: '3س = 19 − 4', why: `عند نقل ${M('+4')} إلى الطرف الآخر تصبح ${M('−4')}.`, kh: 'نقل حدّ إلى الطرف الآخر', ans: 5 },
+    { s: ['2س − 5 = 9', '2س = 9 − 5', '2س = 4', 'س = 2'], w: 1, fix: '2س = 9 + 5', why: `عند نقل ${M('−5')} إلى الطرف الآخر تصبح ${M('+5')}.`, kh: 'نقل حدّ إلى الطرف الآخر', ans: 7 },
+    { s: ['5س + 3 = 33', '5س = 33 − 3', '5س = 30', 'س = 30 − 5 = 25'], w: 3, fix: 'س = 30 ÷ 5 = 6', why: 'لعزل س نقسم الطرفين على معامل س ولا نطرحه.', kh: 'عزل المتغيّر', ans: 6 },
+    { s: ['6س − 2 = 22', '6س = 22 + 2', '6س = 24', 'س = 24 ÷ 4 = 6'], w: 3, fix: 'س = 24 ÷ 6 = 4', why: `نقسم على معامل س وهو ${M('6')}، لا على ${M('4')}.`, kh: 'عزل المتغيّر', ans: 4 }
+  ],
+  mid: [
+    { s: ['5س + 2 = 2س + 14', '5س − 2س = 14 + 2', '3س = 16', 'س = 16 ÷ 3'], w: 1, fix: '5س − 2س = 14 − 2', why: `عند نقل ${M('+2')} إلى الطرف الأيمن تصبح ${M('−2')}.`, kh: 'نقل حدّ إلى الطرف الآخر', ans: 4 },
+    { s: ['7س − 3 = 3س + 17', '7س − 3س = 17 + 3', '10س = 20', 'س = 2'], w: 2, fix: '4س = 20', why: `${M('7س − 3س = 4س')}؛ نطرح المعاملين ولا نجمعهما.`, kh: 'جمع الحدود المتشابهة', ans: 5 },
+    { s: ['9س + 1 = 4س + 31', '9س − 4س = 31 − 1', '5س = 30', 'س = 5 ÷ 30'], w: 3, fix: 'س = 30 ÷ 5 = 6', why: `نقسم الطرف الأيمن على معامل س وهو ${M('5')}، وليس العكس.`, kh: 'عزل المتغيّر', ans: 6 },
+    { s: ['6س + 5 = 2س + 21', '6س + 2س = 21 − 5', '8س = 16', 'س = 2'], w: 1, fix: '6س − 2س = 21 − 5', why: `عند نقل ${M('2س')} إلى الطرف الأيسر تصبح ${M('−2س')}.`, kh: 'نقل حدّ إلى الطرف الآخر', ans: 4 }
+  ],
+  hard: [
+    { s: ['3(س + 2) = 2س + 11', '3س + 2 = 2س + 11', '3س − 2س = 11 − 2', 'س = 9'], w: 1, fix: '3س + 6 = 2س + 11', why: `نضرب ${M('3')} في كل حد داخل القوس: ${M('3 × 2 = 6')}.`, kh: 'خاصية التوزيع', ans: 5 },
+    { s: ['4(س − 1) = 2س + 8', '4س − 4 = 2س + 8', '4س − 2س = 8 − 4', '2س = 4', 'س = 2'], w: 2, fix: '4س − 2س = 8 + 4', why: `عند نقل ${M('−4')} إلى الطرف الآخر تصبح ${M('+4')}.`, kh: 'نقل حدّ إلى الطرف الآخر', ans: 6 },
+    { s: ['2(3س − 1) = 4س + 6', '6س − 2 = 4س + 6', '6س − 4س = 6 + 2', '2س = 8', 'س = 8 × 2 = 16'], w: 4, fix: 'س = 8 ÷ 2 = 4', why: 'لعزل س نقسم على معامل س ولا نضرب.', kh: 'عزل المتغيّر', ans: 4 },
+    { s: ['5(س + 1) − 3 = 2س + 17', '5س + 5 − 3 = 2س + 17', '5س + 2 = 2س + 17', '5س − 2س = 17 + 2', '3س = 19', 'س = 19 ÷ 3'], w: 3, fix: '5س − 2س = 17 − 2', why: `عند نقل ${M('+2')} إلى الطرف الآخر تصبح ${M('−2')}.`, kh: 'نقل حدّ إلى الطرف الآخر', ans: 5 }
+  ]
+};
+
+/* ---------- الحالة ---------- */
+let S;
+function fresh(level, name) {
+  S = {
+    name: name || '', level, stage: -1, unlocked: 0,
+    done: [false, false, false, false, false],
+    code: Array(6).fill(null), points: 0,
+    stat: STAGES.map(() => ({ score: 0, max: 0, wrong: 0, hints: 0, medal: null })),
+    t0: Date.now(), qs: [], qi: 0
+  };
+  $('#pts').textContent = '0';
+  paintVault();
+}
+const cur = () => S.qs[S.qi];
+
+/* ---------- لوحة الشفرة ---------- */
+function buildVault() {
+  const g = [[0], [1, 2], [3], [4, 5]];
+  $('#slots').innerHTML = g.map((ix, gi) =>
+    `<div class="grp"><div class="pair">${ix.map(i => `<div class="slot" id="s${i}">${LOCK}</div>`).join('')}</div><span class="gl" dir="rtl">قفل ${gi + 1}</span></div>`
+  ).join('');
+}
+function paintVault(reveal = []) {
+  for (let i = 0; i < 6; i++) {
+    const el = $('#s' + i), v = S.code[i];
+    if (v == null) { el.className = 'slot'; el.innerHTML = LOCK; }
+    else { el.className = 'slot on' + (reveal.includes(i) ? ' pop' : ''); el.textContent = v; }
+  }
+}
+
+/* ---------- الشاشات ---------- */
+function show(h, top = true) { app.innerHTML = h; if (top) window.scrollTo({ top: 0, behavior: 'auto' }); }
+
+function screenStart() {
+  show(`<section class="card">
+    <h1>ستة أرقام خلف أربعة أقفال</h1>
+    <p class="lead">كل مسألة تحلّينها تفتح قفلًا وتكشف رقمًا من الشفرة. اجمعي الأرقام لتفتحي الصندوق الأخير وتنالي شهادة الإنجاز.</p>
+    <label class="fl" for="nm">اسمك على الشهادة (اختياري)</label>
+    <input id="nm" class="txt" maxlength="40" autocomplete="off" value="${esc(S.name)}">
+    <div class="fl" id="lvl">المستوى</div>
+    <div class="lv" role="radiogroup" aria-labelledby="lvl">
+      ${Object.entries(LEVELS).map(([k, v]) => `<button class="lvb" role="radio" aria-checked="${S.level === k}" data-lv="${k}"><span>${v.name}</span><small>${v.note}</small></button>`).join('')}
+    </div>
+    <button class="btn primary full" data-act="begin">ابدئي المهمة</button>
+  </section>`);
+}
+
+function screenMap() {
+  const items = STAGES.map((c, i) => {
+    const st = S.done[i] ? 'done' : i === S.unlocked ? 'cur' : 'lock';
+    const icon = st === 'done' ? UNLOCK : LOCK22;
+    const side = st === 'done' ? medalSVG(S.stat[i].medal, 28)
+      : st === 'cur' ? `<button class="btn primary" data-act="stage" data-i="${i}">ابدئي</button>`
+      : '<span class="lockedtxt">مقفلة</span>';
+    return `<li class="${st}"><span class="node ${st}">${icon}</span><div><div class="rt">${c.title}</div><div class="rd">${c.desc}</div></div><div>${side}</div></li>`;
+  }).join('');
+  show(`<section class="card"><div class="maphead"><h2>خريطة المراحل</h2><span class="chip">المستوى: ${LEVELS[S.level].name}</span></div><ol class="map">${items}</ol></section>`);
+}
+
+/* ---------- بناء الأسئلة ---------- */
+const base = () => ({ wrong: 0, used: 0, done: false });
+function numQ(o) { return Object.assign(base(), { kind: 'num' }, o); }
+function errQ(e) {
+  return Object.assign(base(), {
+    kind: 'error', steps: e.s, wrongIdx: e.w, fix: e.fix, why: e.why, ans: e.ans, phase: 1, mark: {},
+    hints: ['قارني كل سطر بالسطر الذي قبله: هل أُجريت العملية نفسها على الطرفين؟', `نوع الخطأ: ${e.kh}.`]
+  });
+}
+function buildQs(i) {
+  const L = S.level;
+  if (i === 0) return [numQ(Object.assign({ prompt: 'حلّي المعادلة. قيمة س هي أول رقم في الشفرة.' }, GEN[L === 'hard' ? 'm' : 'e']()))];
+  if (i === 1) {
+    const p = { easy: ['e', 'e'], mid: ['m', 'm'], hard: ['m', 'h'] }[L];
+    const a = GEN[p[0]]();
+    let b = GEN[p[1]]();
+    while (b.eq === a.eq) b = GEN[p[1]]();
+    return [a, b].map(o => numQ(Object.assign({ prompt: 'حلّي المعادلة. قيمة س رقم جديد في الشفرة.' }, o)));
+  }
+  if (i === 2) return [errQ(pick(ERR[L]))];
+  if (i === 3) return shuffle(['tri', 'line', 'perim', 'area']).slice(0, 2).map(k => numQ(GEO[k](L)));
+  return [Object.assign(base(), {
+    kind: 'final',
+    hints: ['الرقم الأول من المرحلة 1، والثاني والثالث من المرحلة 2.', 'الرقم الرابع من المرحلة 3، والخامس والسادس من المرحلة 4.']
+  })];
+}
+
+function startStage(i) { S.stage = i; S.qs = buildQs(i); S.qi = 0; renderQ(null, true); }
+
+/* ---------- عرض السؤال ---------- */
+function numBody(q) {
+  return `<p class="prompt">${q.prompt}</p>
+    ${q.fig ? `<div class="fig">${q.fig}<div class="note">الرسم غير مقيّس.</div></div>` : ''}
+    ${q.eq ? `<div class="eq" dir="ltr">${fmt(q.eq)}</div>` : ''}
+    <div class="ansrow"><label for="ans">${M('س =')}</label><input id="ans" class="ans" inputmode="numeric" autocomplete="off" maxlength="2" aria-label="قيمة س" ${q.done ? `readonly value="${q.ans}"` : ''}></div>`;
+}
+function errBody(q) {
+  const rows = q.steps.map((s, i) => {
+    const c = q.mark[i] || '';
+    return `<li><button class="step ${c}" data-step="${i}" ${q.phase === 2 || q.done ? 'disabled' : ''}><span class="sn">الخطوة ${i + 1}</span><span class="m" dir="ltr">${fmt(s)}</span>${c === 'found' ? '<span class="tag">الخطأ هنا</span>' : ''}</button></li>`;
+  }).join('');
+  const p2 = q.phase === 2 ? `<div class="fixbox"><b>الصواب:</b> ${M(q.fix)}</div>
+    <p class="prompt">أكملي الحل الصحيح من هذه الخطوة. ما قيمة س؟</p>
+    <div class="ansrow"><label for="ans">${M('س =')}</label><input id="ans" class="ans" inputmode="numeric" autocomplete="off" maxlength="2" aria-label="قيمة س" ${q.done ? `readonly value="${q.ans}"` : ''}></div>` : '';
+  return `<p class="prompt">${q.phase === 1 ? 'حلّت طالبة معادلة، وفي حلّها خطوة واحدة خاطئة. اضغطي على الخطوة الخاطئة.' : 'وجدتِ الخطأ.'}</p><ol class="steps">${rows}</ol>${p2}`;
+}
+function finalBody() {
+  return `<p class="prompt">أدخلي الأرقام الستة التي كشفتِها، بالترتيب من اليسار إلى اليمين كما تظهر في لوحة الشفرة.</p>
+    ${boxSVG()}
+    <div class="pin" dir="ltr">${[0, 1, 2, 3, 4, 5].map(i => `<input class="pinbox" inputmode="numeric" maxlength="1" autocomplete="off" data-i="${i}" aria-label="الرقم ${i + 1}">`).join('')}</div>`;
+}
+const hintsHtml = q => q.hints.slice(0, q.used).map(h => `<p class="hint">${h}</p>`).join('');
+function actionsHtml(q) {
+  if (q.done) {
+    const last = S.qi === S.qs.length - 1;
+    return `<button class="btn primary" data-act="next">${last ? 'إنهاء المرحلة' : 'السؤال التالي'}</button>`;
+  }
+  const can = q.kind === 'error' ? q.phase === 2 : true;
+  const rem = q.hints.length - q.used;
+  return `${can ? `<button class="btn primary" data-act="check">${q.kind === 'final' ? 'افتحي الصندوق' : 'تحقّقي'}</button>` : ''}
+    <button class="btn ghost" data-act="hint" ${rem ? '' : 'disabled'}>${rem ? 'تلميح (يخصم نقطتين)' : 'لا توجد تلميحات أخرى'}</button>`;
+}
+function renderQ(msg, top) {
+  const q = cur(), cfg = STAGES[S.stage];
+  const body = q.kind === 'error' ? errBody(q) : q.kind === 'final' ? finalBody() : numBody(q);
+  const meta = q.kind === 'final' ? 'المرحلة 5 من 5' : `المرحلة ${S.stage + 1} من 5 — السؤال ${S.qi + 1} من ${S.qs.length}`;
+  show(`<section class="card"><div class="qmeta">${meta}</div><h2 class="qt">${cfg.title}</h2>${body}
+    <div class="hints" id="hints">${hintsHtml(q)}</div>
+    <div class="fb ${msg ? msg.t : ''}" id="fb" role="status" aria-live="polite">${msg ? msg.h : ''}</div>
+    <div class="actions" id="actions">${actionsHtml(q)}</div></section>`, !!top);
+}
+function fb(h, t) { const el = $('#fb'); el.className = 'fb ' + t; el.innerHTML = h; }
+
+/* ---------- المنطق ---------- */
+function award(q) {
+  const v = Math.max(2, 10 - 3 * q.wrong - 2 * q.used), st = S.stat[S.stage];
+  st.score += v; st.max += 10; st.wrong += q.wrong; st.hints += q.used;
+  S.points += v; $('#pts').textContent = S.points;
+  q.done = true; return v;
+}
+const medalFor = st => { const r = st.score / st.max; return r >= .9 ? 'gold' : r >= .6 ? 'silver' : 'bronze'; };
+
+function success(q) {
+  const v = award(q), slot = STAGES[S.stage].slots[S.qi];
+  S.code[slot] = q.ans; paintVault([slot]);
+  renderQ({ t: 'ok', h: `صحيح! كسبتِ ${v} نقاط، وظهر الرقم <b>${q.ans}</b> في الشفرة.` });
+}
+function check() {
+  const q = cur(); if (q.done) return;
+  if (q.kind === 'final') return checkFinal(q);
+  const el = $('#ans'); if (!el) return;
+  const v = norm(el.value);
+  if (!v) { fb('اكتبي الإجابة أولًا.', 'warn'); el.focus(); return; }
+  if (+v === q.ans) success(q);
+  else { q.wrong++; fb('هذه ليست قيمة س الصحيحة. راجعي حلّك أو اطلبي تلميحًا.', 'bad'); el.select(); }
+}
+function checkFinal(q) {
+  const boxes = $$('.pinbox'), vals = boxes.map(b => norm(b.value));
+  const empty = vals.findIndex(v => v === '');
+  if (empty > -1) { fb('أكملي الأرقام الستة أولًا.', 'warn'); boxes[empty].focus(); return; }
+  let ok = 0;
+  boxes.forEach((b, i) => { const g = +vals[i] === S.code[i]; b.classList.toggle('good', g); b.classList.toggle('badbox', !g); if (g) ok++; });
+  if (ok === 6) {
+    award(q); S.stat[4].medal = medalFor(S.stat[4]); S.done[4] = true; screenBox();
+  } else { q.wrong++; fb(`${ok} من 6 أرقام في مكانها الصحيح. الخاطئة ظاهرة بالأحمر.`, 'bad'); }
+}
+function stepClick(i) {
+  const q = cur(); if (q.kind !== 'error' || q.phase !== 1 || q.done) return;
+  if (i === q.wrongIdx) {
+    q.mark[i] = 'found'; q.phase = 2;
+    renderQ({ t: 'ok', h: `أحسنتِ! هذه هي الخطوة الخاطئة. ${q.why}` });
+  } else {
+    if (!q.mark[i]) { q.wrong++; q.mark[i] = 'fine'; }
+    renderQ({ t: 'bad', h: 'هذه الخطوة سليمة. قارني بينها وبين الخطوة التي قبلها وجرّبي خطوة أخرى.' });
+  }
+}
+function hint() {
+  const q = cur(); if (q.done || q.used >= q.hints.length) return;
+  q.used++; $('#hints').innerHTML = hintsHtml(q); $('#actions').innerHTML = actionsHtml(q);
+}
+function nextQ() { if (S.qi < S.qs.length - 1) { S.qi++; renderQ(null, true); } else finishStage(); }
+
+function finishStage() {
+  const i = S.stage, st = S.stat[i];
+  st.medal = medalFor(st); S.done[i] = true; S.unlocked = Math.max(S.unlocked, i + 1);
+  const digits = STAGES[i].slots.map(k => S.code[k]).join('، ');
+  show(`<section class="card center">
+    ${medalSVG(st.medal, 64)}
+    <h2>فُتح القفل ${i + 1}</h2>
+    <p>ميدالية ${MEDALS[st.medal][1]}. حصلتِ على ${st.score} من ${st.max} نقاط.</p>
+    <p class="lead">${STAGES[i].slots.length > 1 ? 'الأرقام التي كشفتِها' : 'الرقم الذي كشفتِه'}: <b>${digits}</b>${i === 3 ? '<br>اكتملت الأرقام الستة، والصندوق الأخير بانتظارك.' : ''}</p>
+    <button class="btn primary" data-act="map">العودة إلى الخريطة</button>
+  </section>`);
+}
+
+/* ---------- الصندوق والنتائج ---------- */
+function boxSVG() {
+  return `<div class="boxwrap" id="bw"><svg viewBox="0 0 320 200" class="boxsvg" role="img" aria-label="صندوق الشفرة"><ellipse cx="160" cy="188" rx="112" ry="8" fill="#1B2540" opacity=".08"/><g class="gem"><polygon points="160,50 184,76 160,104 136,76" fill="#C9962B"/><polygon points="160,50 184,76 160,76" fill="#E3B955"/></g><rect x="52" y="104" width="216" height="78" rx="10" fill="#2A3556"/><rect x="52" y="130" width="216" height="9" fill="#C9962B"/><g class="lid"><rect x="46" y="72" width="228" height="38" rx="10" fill="#1B2540"/><rect x="46" y="90" width="228" height="8" fill="#C9962B"/><rect x="148" y="86" width="24" height="26" rx="5" fill="#E3B955"/></g></svg></div>`;
+}
+function screenBox() {
+  show(`<section class="card center">${boxSVG()}<h2>انفتح الصندوق!</h2><p class="lead">فككتِ الشفرة كاملة. شهادة إنجازك جاهزة.</p><button class="btn primary" data-act="results">عرض النتائج والشهادة</button></section>`);
+  setTimeout(() => { const b = $('#bw'); if (b) b.classList.add('open'); }, 350);
+}
+function screenResults() {
+  const pct = Math.round(S.points / MAXPTS * 100);
+  const word = pct >= 90 ? 'بتميّز' : pct >= 70 ? 'بجدارة' : 'باجتهاد';
+  const mins = Math.max(1, Math.round((Date.now() - S.t0) / 60000));
+  const wrongAll = S.stat.reduce((a, s) => a + s.wrong, 0), hintsAll = S.stat.reduce((a, s) => a + s.hints, 0);
+  const rows = STAGES.map((c, i) => { const s = S.stat[i]; return `<div class="trow"><span>${c.title}</span><span>${s.score}/${s.max}</span><span>${s.wrong}</span><span>${s.hints}</span><span>${medalSVG(s.medal, 20)}</span></div>`; }).join('');
+  const date = new Date().toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' });
+  const up = S.level === 'easy' ? 'mid' : S.level === 'mid' ? 'hard' : null;
+  show(`<section class="card center noprint">
+      <h2>لوحة النتائج</h2>
+      <div class="big">${S.points} <small>من ${MAXPTS}</small></div>
+      <div class="stats"><span>المستوى: ${LEVELS[S.level].name}</span><span>الوقت: ${mins} دقيقة</span><span>محاولات خاطئة: ${wrongAll}</span><span>تلميحات: ${hintsAll}</span></div>
+      <div class="trow h"><span>المرحلة</span><span>النقاط</span><span>الأخطاء</span><span>التلميحات</span><span>الميدالية</span></div>
+      ${rows}
+    </section>
+    <section class="cert" id="cert"><div class="cert-in">
+      <div class="sm">مبادرة</div>
+      <h3>شفرة الرياضيات</h3>
+      <p>تشهد المبادرة بأن الطالبة</p>
+      <div class="nm">${S.name ? esc(S.name) : '&nbsp;'}</div>
+      <p>فكّت الشفرة كاملة واجتازت مراحل التحدي ${word}،<br>بمستوى ${LEVELS[S.level].name}، وحصلت على ${S.points} من ${MAXPTS} نقطة.</p>
+      <p class="sm">فكّري، حلّي، اكتشفي!</p>
+      <p class="sm">${date}</p>
+    </div></section>
+    <div class="row noprint">
+      <button class="btn primary" data-act="print">طباعة الشهادة</button>
+      ${up ? `<button class="btn" data-act="again" data-lv="${up}">جرّبي المستوى الأعلى</button>` : ''}
+      <button class="btn ghost" data-act="again" data-lv="${S.level}">ابدئي من جديد</button>
+    </div>`);
+}
+
+/* ---------- الأحداث ---------- */
+app.addEventListener('click', e => {
+  const st = e.target.closest('[data-step]');
+  if (st) { stepClick(+st.dataset.step); return; }
+  const lv = e.target.closest('[data-lv]');
+  if (lv && lv.classList.contains('lvb')) {
+    S.level = lv.dataset.lv;
+    $$('.lvb').forEach(b => b.setAttribute('aria-checked', String(b === lv)));
+    return;
+  }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  switch (b.dataset.act) {
+    case 'begin': S.name = $('#nm').value.trim(); S.t0 = Date.now(); screenMap(); break;
+    case 'stage': startStage(+b.dataset.i); break;
+    case 'check': check(); break;
+    case 'hint': hint(); break;
+    case 'next': nextQ(); break;
+    case 'map': screenMap(); break;
+    case 'results': screenResults(); break;
+    case 'print': window.print(); break;
+    case 'again': fresh(b.dataset.lv, S.name); screenMap(); break;
+  }
+});
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.target.id === 'ans' || e.target.classList.contains('pinbox'))) { e.preventDefault(); check(); }
+  if (e.key === 'Backspace' && e.target.classList.contains('pinbox') && !e.target.value) {
+    const p = $(`.pinbox[data-i="${+e.target.dataset.i - 1}"]`); if (p) p.focus();
+  }
+});
+app.addEventListener('input', e => {
+  if (!e.target.classList.contains('pinbox')) return;
+  e.target.value = norm(e.target.value).slice(-1);
+  e.target.classList.remove('good', 'badbox');
+  if (e.target.value) { const n = $(`.pinbox[data-i="${+e.target.dataset.i + 1}"]`); if (n) n.focus(); }
+});
+
+buildVault();
+fresh('mid', '');
+screenStart();
+})();
+</script>
+</body>
+</html>
